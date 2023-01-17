@@ -10,6 +10,7 @@ runs:
   using: "composite"
   steps:
     - name: "Publish to crates.io"
+      shell: bash
       run: |
         for pkg in ${{inputs.packages}}; do
           current="$(cargo metadata --no-deps |jq -r '.packages[] | select(.name == "'"$pkg"'") | .version')"
