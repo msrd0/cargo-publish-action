@@ -1,0 +1,19 @@
+name: 'Cargo Publish'
+description: 'Publish crates to crates.io'
+
+inputs:
+  packages:
+    description: 'List of all packages to upload in order, separated by whitespace'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Publish to crates.io"
+      run: |
+        for pkg in ${{inputs.packages}}; do
+          current="$(cargo metadata --no-deps |jq -r '.packages[] | select(.name == "'"$pkg"'") | .version')"
+          if ! wget -qO- "https://crates.io/api/v1/crates/$pkg" |jq -r '.versions[].num' |grep -E '^'"$current"'$' >/dev/null; then
+              cargo publish -p "$pkg"
+          fi
+        done
